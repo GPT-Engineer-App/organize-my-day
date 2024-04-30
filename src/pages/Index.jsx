@@ -1,15 +1,79 @@
-// Complete the Index page component here
-// Use chakra-ui
-import { Button } from "@chakra-ui/react"; // example
-import { FaPlus } from "react-icons/fa"; // example - use react-icons/fa for icons
+import { useState } from 'react';
+import { Box, Button, Input, List, ListItem, ListIcon, IconButton, useToast } from '@chakra-ui/react';
+import { FaPlus, FaTrash, FaCheckCircle, FaRegCircle } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const Index = () => {
-  // TODO: Create the website here!
+  const [tasks, setTasks] = useState([]);
+  const [input, setInput] = useState('');
+  const toast = useToast();
+
+  const addTask = () => {
+    if (input.trim() === '') {
+      toast({
+        title: 'No task entered',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+    setTasks([...tasks, { id: Date.now(), text: input, isComplete: false }]);
+    setInput('');
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const toggleTaskCompletion = (id) => {
+    setTasks(tasks.map(task => task.id === id ? { ...task, isComplete: !task.isComplete } : task));
+  };
+
   return (
-    <Button>
-      Hello world! <FaPlus />
-    </Button>
-  ); // example
+    <Box p={8} maxW="500px" mx="auto">
+      <Input
+        placeholder="Add a new task..."
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        size="lg"
+        mb={4}
+      />
+      <Button leftIcon={<FaPlus />} colorScheme="blue" onClick={addTask} w="full" mb={4}>
+        Add Task
+      </Button>
+      <List spacing={3}>
+        {tasks.map(task => (
+          <ListItem key={task.id} as={motion.div} layout>
+            <Box
+              p={4}
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              bg={task.isComplete ? 'green.100' : 'gray.100'}
+              borderRadius="md"
+            >
+              <IconButton
+                icon={task.isComplete ? <FaCheckCircle /> : <FaRegCircle />}
+                onClick={() => toggleTaskCompletion(task.id)}
+                aria-label="Complete task"
+                colorScheme={task.isComplete ? "green" : "gray"}
+              />
+              <Box flex="1" pl={4} isTruncated>
+                {task.text}
+              </Box>
+              <IconButton
+                icon={<FaTrash />}
+                onClick={() => deleteTask(task.id)}
+                aria-label="Delete task"
+                colorScheme="red"
+              />
+            </Box>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
 };
 
 export default Index;
